@@ -1,0 +1,525 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// MODELOS MIGRADOS DE FIREBASE
+// ============================================
+
+// Resultados - Galería de proyectos/resultados
+model Resultado {
+  id        String   @id @default(cuid())
+  title     String
+  prompt    String
+  imageUrl  String
+  imageUrl2 String?
+  imageUrl3 String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("resultados")
+}
+
+// Projects - Portafolio de proyectos
+model Project {
+  id          String   @id @default(cuid())
+  title       String?
+  description String?
+  imageUrl    String?
+  imageHint   String?
+  url         String?
+  type        String   @default("project") // "project" | "blog"
+  htmlContent String?
+  categoryId  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("projects")
+}
+
+// Images - Galería de imágenes
+model Image {
+  id          String   @id @default(cuid())
+  name        String
+  url         String
+  storagePath String?
+  createdAt   DateTime @default(now())
+
+  @@map("images")
+}
+
+// Tools - Herramientas
+model Tool {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  imageUrl    String?
+  url         String?
+  price       Float?
+  paymentDay  Int?
+  isPaid      Boolean  @default(false)
+  categoryIds String[] // Array de IDs de categorías
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("tools")
+}
+
+// ToolCategories - Categorías de herramientas
+model ToolCategory {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  @@map("tool_categories")
+}
+
+// Protocols - Protocolos con pasos
+model Protocol {
+  id        String         @id @default(cuid())
+  title     String
+  steps     ProtocolStep[]
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  @@map("protocols")
+}
+
+model ProtocolStep {
+  id          String   @id @default(cuid())
+  title       String?
+  description String?
+  imageUrl    String?
+  order       Int      @default(0)
+  protocolId  String
+  protocol    Protocol @relation(fields: [protocolId], references: [id], onDelete: Cascade)
+
+  @@map("protocol_steps")
+}
+
+// TeamItems - Miembros del equipo
+model TeamItem {
+  id           String   @id @default(cuid())
+  name         String
+  position     String
+  bio          String?
+  imageUrl     String?
+  email        String?
+  linkedinUrl  String?
+  portfolioUrl String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("team_items")
+}
+
+// SajorItems - Items SaJor
+model SajorItem {
+  id          String   @id @default(cuid())
+  title       String
+  url         String?
+  description String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("sajor_items")
+}
+
+// AprendePages - Páginas de aprendizaje (estructura compleja)
+model AprendePage {
+  id        String   @id @default(cuid())
+  title     String
+  code      String   @unique
+  htmlText  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Hero Section
+  heroEnabled     Boolean @default(false)
+  heroTitle       String?
+  heroDescription String?
+  heroCtaText     String?
+  heroCtaUrl      String?
+  heroImageUrl    String?
+
+  // Feature Section
+  featureSectionEnabled     Boolean @default(false)
+  featureSectionTitle       String?
+  featureSectionDescription String?
+  featureSectionCtaText     String?
+  featureSectionCtaUrl      String?
+
+  // Steps Section
+  stepsSectionEnabled Boolean @default(false)
+
+  // Icon List Section
+  iconListSectionEnabled     Boolean @default(false)
+  iconListSectionDescription String?
+
+  // Media Grid Section
+  mediaGridSectionEnabled Boolean @default(false)
+
+  // Pricing Section
+  pricingSectionEnabled Boolean @default(false)
+
+  // Full Width Media Section
+  fullWidthMediaSectionEnabled     Boolean @default(false)
+  fullWidthMediaSectionTitle       String?
+  fullWidthMediaSectionDescription String?
+  fullWidthMediaSectionImageUrl    String?
+  fullWidthMediaSectionVideoUrl    String?
+
+  // FAQ Section
+  faqSectionEnabled Boolean @default(false)
+
+  // Open Questionnaire Section
+  openQuestionnaireEnabled Boolean @default(false)
+  openQuestionnaireTitle   String?
+
+  // Checkbox Questionnaire Section
+  checkboxQuestionnaireEnabled Boolean @default(false)
+  checkboxQuestionnaireTitle   String?
+
+  // Contact Form Section
+  contactFormEnabled         Boolean @default(false)
+  contactFormTitle           String?
+  contactFormShowName        Boolean @default(false)
+  contactFormShowPhone       Boolean @default(false)
+  contactFormShowEmail       Boolean @default(false)
+  contactFormShowTextMessage Boolean @default(false)
+  contactFormShowInstagram   Boolean @default(false)
+  contactFormShowFacebook    Boolean @default(false)
+  contactFormShowLinkedIn    Boolean @default(false)
+  contactFormShowTikTok      Boolean @default(false)
+
+  // CTA Section
+  ctaSectionEnabled     Boolean @default(false)
+  ctaSectionTitle       String?
+  ctaSectionDescription String?
+  ctaSectionButtonText  String?
+  ctaSectionButtonUrl   String?
+
+  // Relaciones con tablas auxiliares para arrays
+  featureCards          AprendeFeatureCard[]
+  stepsItems            AprendeStepItem[]
+  iconListItems         AprendeIconListItem[]
+  mediaGridCards        AprendeMediaGridCard[]
+  pricingCards          AprendePricingCard[]
+  faqItems              AprendeFaqItem[]
+  openQuestionItems     AprendeOpenQuestion[]
+  checkboxQuestionItems AprendeCheckboxQuestion[]
+
+  @@map("aprende_pages")
+}
+
+model AprendeFeatureCard {
+  id            String      @id @default(cuid())
+  icon          String?
+  title         String?
+  description   String?
+  order         Int         @default(0)
+  aprendePageId String
+  aprendePage   AprendePage @relation(fields: [aprendePageId], references: [id], onDelete: Cascade)
+
+  @@map("aprende_feature_cards")
+}
+
+model AprendeStepItem {
+  id            String      @id @default(cuid())
+  title         String?
+  description   String?
+  imageUrl      String?
+  order         Int         @default(0)
+  aprendePageId String
+  aprendePage   AprendePage @relation(fields: [aprendePageId], references: [id], onDelete: Cascade)
+
+  @@map("aprende_step_items")
+}
+
+model AprendeIconListItem {
+  id            String      @id @default(cuid())
+  icon          String?
+  title         String?
+  order         Int         @default(0)
+  aprendePageId String
+  aprendePage   AprendePage @relation(fields: [aprendePageId], references: [id], onDelete: Cascade)
+
+  @@map("aprende_icon_list_items")
+}
+
+model AprendeMediaGridCard {
+  id            String      @id @default(cuid())
+  title         String?
+  description   String?
+  imageUrl      String?
+  videoUrl      String?
+  ctaText       String?
+  ctaUrl        String?
+  order         Int         @default(0)
+  aprendePageId String
+  aprendePage   AprendePage @relation(fields: [aprendePageId], references: [id], onDelete: Cascade)
+
+  @@map("aprende_media_grid_cards")
+}
+
+model AprendePricingCard {
+  id            String      @id @default(cuid())
+  htmlContent   String
+  order         Int         @default(0)
+  aprendePageId String
+  aprendePage   AprendePage @relation(fields: [aprendePageId], references: [id], onDelete: Cascade)
+
+  @@map("aprende_pricing_cards")
+}
+
+model AprendeFaqItem {
+  id            String      @id @default(cuid())
+  question      String
+  answer        String
+  order         Int         @default(0)
+  aprendePageId String
+  aprendePage   AprendePage @relation(fields: [aprendePageId], references: [id], onDelete: Cascade)
+
+  @@map("aprende_faq_items")
+}
+
+model AprendeOpenQuestion {
+  id            String      @id @default(cuid())
+  question      String
+  order         Int         @default(0)
+  aprendePageId String
+  aprendePage   AprendePage @relation(fields: [aprendePageId], references: [id], onDelete: Cascade)
+
+  @@map("aprende_open_questions")
+}
+
+model AprendeCheckboxQuestion {
+  id            String                        @id @default(cuid())
+  question      String
+  order         Int                           @default(0)
+  options       AprendeCheckboxQuestionOption[]
+  aprendePageId String
+  aprendePage   AprendePage                   @relation(fields: [aprendePageId], references: [id], onDelete: Cascade)
+
+  @@map("aprende_checkbox_questions")
+}
+
+model AprendeCheckboxQuestionOption {
+  id         String                  @id @default(cuid())
+  label      String
+  order      Int                     @default(0)
+  questionId String
+  question   AprendeCheckboxQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@map("aprende_checkbox_question_options")
+}
+
+// Formations - Cursos/formaciones
+model Formation {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  url         String?
+  tag         String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("formations")
+}
+
+// N8NServers - Servidores N8N
+model N8NServer {
+  id        String   @id @default(cuid())
+  title     String
+  url       String
+  code      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("n8n_servers")
+}
+
+// N8NTemplates - Plantillas N8N
+model N8NTemplate {
+  id          String   @id @default(cuid())
+  title       String
+  jsonContent String?
+  htmlContent String?
+  url         String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("n8n_templates")
+}
+
+// Links - Enlaces
+model Link {
+  id        String   @id @default(cuid())
+  title     String
+  url       String
+  tag       String
+  cardId    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("links")
+}
+
+// LinkCards - Tarjetas de enlaces
+model LinkCard {
+  id        String   @id @default(cuid())
+  title     String
+  imageUrl  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("link_cards")
+}
+
+// Prompts - Prompts de IA
+model Prompt {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  promptText  String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("prompts")
+}
+
+// Notes - Notas
+model Note {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("notes")
+}
+
+// Designs - Diseños
+model Design {
+  id        String   @id @default(cuid())
+  title     String
+  imageUrl  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("designs")
+}
+
+// HtmlPages - Páginas HTML
+model HtmlPage {
+  id          String   @id @default(cuid())
+  title       String
+  htmlContent String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("html_pages")
+}
+
+// Shorts - Videos cortos
+model Short {
+  id         String   @id @default(cuid())
+  title      String
+  youtubeUrl String
+  tags       String[] // Array de tags
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("shorts")
+}
+
+// GitProtocols - Protocolos de Git
+model GitProtocol {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  steps       GitStep[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("git_protocols")
+}
+
+model GitStep {
+  id            String      @id @default(cuid())
+  gitCommand    String?
+  description   String?
+  imageUrl      String?
+  order         Int         @default(0)
+  gitProtocolId String
+  gitProtocol   GitProtocol @relation(fields: [gitProtocolId], references: [id], onDelete: Cascade)
+
+  @@map("git_steps")
+}
+
+// Services - Servicios ofrecidos
+model Service {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  iconUrl     String
+  url         String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("services")
+}
+
+// HeroContent - Contenido del hero (singleton)
+model HeroContent {
+  id                 String       @id @default("main")
+  description        String
+  backgroundImageUrl String
+  updatedAt          DateTime     @updatedAt
+  buttons            HeroButton[]
+
+  @@map("hero_content")
+}
+
+model HeroButton {
+  id            String      @id @default(cuid())
+  text          String
+  url           String
+  variant       String // "primary" | "outline"
+  order         Int         @default(0)
+  heroContentId String
+  heroContent   HeroContent @relation(fields: [heroContentId], references: [id], onDelete: Cascade)
+
+  @@map("hero_buttons")
+}
+
+// AboutContent - Contenido de la página about (singleton)
+model AboutContent {
+  id          String   @id @default("main")
+  title       String
+  description String
+  imageUrl    String
+  updatedAt   DateTime @updatedAt
+
+  @@map("about_content")
+}
+
+// BlogCategories - Categorías de blog
+model BlogCategory {
+  id        String   @id @default(cuid())
+  title     String
+  imageUrl  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("blog_categories")
+}
