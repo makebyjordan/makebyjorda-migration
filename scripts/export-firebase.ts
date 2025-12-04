@@ -10,10 +10,17 @@
  * en el archivo .env antes de ejecutar este script.
  */
 
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Configuración de Firebase
 const firebaseConfig = {
